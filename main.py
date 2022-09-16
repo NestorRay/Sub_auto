@@ -1,3 +1,4 @@
+from fileinput import filename
 import os
 import logging
 from pickle import NONE
@@ -5,6 +6,12 @@ import requests
 import socketserver
 import time
 
+#创建日志文件
+def logs (t,cont):
+    filename='log.txt'
+    with open(filename,'a') as f:
+        cont=time_now()+" "+cont
+        f.write(cont)
 #获取时间，写入日志
 def time_now():
     t = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime())
@@ -20,6 +27,6 @@ url="https://api.github.com/"
 content=requests.get(url).content
 #判断返回值是否为空
 if content is not NONE:
-    print(time_now(),"连通性测试成功")
+    logs(time_now(),"Connected to proxy server\n")
 else:
-    print(time_now(),"测试失败")
+    logs(time_now(),"Cannot Connect to proxy server\n")
