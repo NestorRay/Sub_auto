@@ -1,11 +1,32 @@
+from cgitb import text
 from fileinput import filename
 import os
 import logging
+import json
 import urllib
 from pickle import NONE
 import requests
 import socketserver
 import time
+
+#是否创建gists
+#不创建 0
+#创建 1
+creat = 1
+
+#gists token在代码中改
+#url_sub，subconverter链接
+url_sub = "http://127.0.0.1:25500/sub?target=clash&url=https%3A%2F%2Fapi.ndsxfkjfvhzdsfio.quest%2Flink%2FmZLZLjiB65lrRCQ4%3Fclash%3D3%7Chttps%3A%2F%2Fxn--4gq62f52gdss.com%2Fapi%2Fv1%2Fclient%2Fsubscribe%3Ftoken%3Dda50b2e73b47466297a62ee4dbad939e&config=https%3A%2F%2Fgist.github.com%2FNestorRay%2Fb9bca277317d0d6acaee858996e59605&append_type=true&upload=true"
+
+#gists url
+#url2 = 
+
+#更新间隔(必须)
+sleeptime = 60
+int(sleeptime)
+
+
+
 
 #创建日志文件并写入
 def logs (t,cont):
@@ -38,9 +59,84 @@ if content is not NONE:
 else:
     logs(time_now(),"Cannot Connect to the proxy server\n")
 
-#获取本地subconverter
-url_sub="http://127.0.0.1:25500/sub?target=clash&url=https%3A%2F%2Fapi.ndsxfkjfvhzdsfio.quest%2Flink%2FmZLZLjiB65lrRCQ4%3Fclash%3D3%7Chttps%3A%2F%2Fxn--4gq62f52gdss.com%2Fapi%2Fv1%2Fclient%2Fsubscribe%3Ftoken%3Dda50b2e73b47466297a62ee4dbad939e&config=https%3A%2F%2Fgist.github.com%2FNestorRay%2Fb9bca277317d0d6acaee858996e59605&append_type=true"
-logs(time_now(),"Start Update\n")
-content=requests.get(url_sub).content.decode("utf-8")
-config(content)
-logs(time_now(),"Update ended\n")
+#首次创建gist
+if creat==1:
+    logs(time_now(),"Start Update\n")
+    content=requests.get(url_sub).content.decode("utf-8")
+    config(content)
+
+    url = "https://api.github.com/gists"
+
+    payload = json.dumps({
+    "description": "Sub_auto",
+    "public": False,
+    "files": {
+        "Sub_auto": {
+        "content": content
+        }
+    }
+    })
+    headers = {
+    'Accept': 'vnd.github+json',
+    'Authorization': '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',
+    'Content-Type': 'application/json'
+    }
+
+    response = requests.request("POST", url, headers=headers, data=payload)
+    text1 = response.text
+    jsonobj = json.loads(text1)
+    url2 = jsonobj["url"]
+    print(url2)
+    while True:
+        logs(time_now(),"Start Update\n")
+        content=requests.get(url_sub).content.decode("utf-8")
+        config(content)
+        logs(time_now(),"Update ended\n")
+
+        payload = json.dumps({
+        "description": "An update to a gist",
+        "files": {
+            "Sub_auto": {
+            "content": content
+            }
+        }
+        })
+        headers = {
+        'accept': 'application/vnd.github+json',
+        'Authorization': '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',
+        'Content-Type': 'application/json'
+        }
+
+        response = requests.request("PATCH", url2, headers=headers, data=payload)
+        
+        time.sleep(sleeptime)
+else:
+
+    #获取本地subconverter
+    while True:
+        logs(time_now(),"Start Update\n")
+        content=requests.get(url_sub).content.decode("utf-8")
+        config(content)
+        logs(time_now(),"Update ended\n")
+
+        payload = json.dumps({
+        "description": "An update to a gist",
+        "files": {
+            "Sub_auto": {
+            "content": content
+            }
+        }
+        })
+        headers = {
+        'accept': 'application/vnd.github+json',
+        'Authorization': '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',
+        'Content-Type': 'application/json'
+        }
+
+        response = requests.request("PATCH", url2, headers=headers, data=payload)
+        
+        time.sleep(sleeptime)
+
+
+
+
